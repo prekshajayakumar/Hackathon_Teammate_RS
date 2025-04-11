@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hackathon Teammate Recommender</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 30px; background-color: #f5f5f5; }
+    .form-container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    input, select, textarea { width: 100%; margin-top: 10px; padding: 10px; border-radius: 6px; border: 1px solid #ccc; }
+    button { margin-top: 20px; padding: 12px 20px; background-color: #007BFF; color: white; border: none; border-radius: 6px; cursor: pointer; }
+    .results { margin-top: 30px; }
+    .teammate { background: #e7f3ff; padding: 10px; margin-bottom: 10px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h2>Find Your Hackathon Teammates</h2>
+    <label for="skills">Preferred Skills (comma-separated)</label>
+    <input type="text" id="skills" placeholder="e.g. Python, ML, Flask" />
+
+    <label for="interests">Preferred Interests (comma-separated)</label>
+    <input type="text" id="interests" placeholder="e.g. AI, Climate, Fintech" />
+
+    <label for="teamSize">Team Size</label>
+    <input type="number" id="teamSize" min="1" max="10" value="4" />
+
+    <button onclick="getRecommendations()">Generate Recommendations</button>
+
+    <div class="results" id="recommendations"></div>
+  </div>
+
+  <script>
+    function getRecommendations() {
+      const skills = document.getElementById('skills').value;
+      const interests = document.getElementById('interests').value;
+      const teamSize = document.getElementById('teamSize').value;
+
+      fetch('recommend', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ skills, interests, team_size: teamSize })
+      })
+      .then(res => res.json())
+      .then(data => {
+        const container = document.getElementById('recommendations');
+        container.innerHTML = '<h3>Recommended Teammates:</h3>';
+        data.forEach((teammate, i) => {
+          container.innerHTML += `<div class="teammate">
+            <strong>User ID:</strong> ${teammate.user_id}<br/>
+            <strong>Skills:</strong> ${teammate.skills}<br/>
+            <strong>Interests:</strong> ${teammate.interests}
+          </div>`;
+        });
+      })
+      .catch(err => {
+        console.error(err);
+        document.getElementById('recommendations').innerHTML = '<p>Error fetching recommendations.</p>';
+      });
+    }
+  </script>
+</body>
+</html>
